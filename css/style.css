@@ -1,3 +1,13 @@
 * {
-font-family: monospace
+	font-family: monospace
+}
+
+.selected {
+	font-weight: bolder;
+	font-size: 18;
+}
+
+.highlighted {
+	font-weight: bolder;
+	background-color: rgb(255,255,0);
 }

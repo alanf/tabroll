@@ -1,6 +1,6 @@
  $(document).ready(function() {
 	$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
-		var row = $('.foo3').append(val + ' :|');
+		var row = $('.staff').append(val + ' :|');
 		for (var i = 0; i < 32; ++i) {
 			$(row).append('<span class="editable">-</span>');
 		}
@@ -8,6 +8,24 @@
 	});
 
 	$('.editable').mouseenter(function (){
-		this.textContent = '?';
+		$(this).addClass('highlighted');
+	});
+
+	$('.editable').mouseleave(function (){
+		$(this).removeClass('highlighted');
+	});
+
+	$('.editable').click(function (){
+		$('.selected').removeClass('selected');
+		$(this).addClass('selected');
+		this.textContent = '-';
+	});
+
+	$(document).keypress(function (e) {
+		$('.selected').each(function () {
+			this.textContent = e.which - 48;
+		});
+
+		$('.selected').removeClass('selected');
 	});
 });
