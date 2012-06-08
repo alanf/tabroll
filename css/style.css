@@ -2,6 +2,21 @@
 	font-family: monospace
 }
 
+.editable {
+	padding-left: 2px;
+	opacity: .6;
+}
+
+.edited {
+	font-weight: bold;
+	opacity: 1.0;
+}
+
+.duration {
+	color: blue;
+	opacity: 0.4;
+}
+
 .selected {
 	font-weight: bolder;
 	font-size: 18;
