@@ -1,0 +1,15 @@
+<html>
+<head>
+<link rel=stylesheet href="css/style.css" type="text/css">
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.2.min.js"></script>
+<script src="js/main.js"></script>
+</head>
+  <body>
+    {% for note in strings %}{{ note }} :|{% for i in beats %}<span class="foo" id="{{ i }}">-</span>{% endfor %}|<br> {% endfor %}
+    <br>
+    <span class="foo2"></span>
+    <br>
+	<span class="foo3"></span>
+  </body>
+</html>
+
