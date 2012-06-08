@@ -50,6 +50,19 @@
 		updateDurationIndicators();
 	};
 
+	var deleteNote = function() {
+		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
+		durationIndicators.each(function () {
+			toRemove = $(this);
+			toRemove.removeClass('duration');
+			toRemove.removeClass('edited');
+			toRemove.text('-');
+			toRemove.fadeTo(.2, .6);
+		});
+
+		$('.highlighted').removeClass('edited').removeClass('highlighted').text('-');
+	};
+
 	$(document).keyup(function (e) {
 		if (e.keyCode == 37 && $('.highlighted').hasClass('edited')) {
 			reduceDuration();
@@ -57,6 +70,11 @@
 
 		if (e.keyCode == 39 && $('.highlighted').hasClass('edited')) {
 			extendDuration();
+		}
+
+		// backspace
+		if (e.keyCode == 8 && $('.highlighted').hasClass('edited')) {
+			deleteNote();
 		}
 	});
 
