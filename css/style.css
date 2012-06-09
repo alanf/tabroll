@@ -37,12 +37,13 @@
 	opacity: 0.4;
 }
 
-.selected {
-	font-weight: bolder;
-	font-size: 18;
-}
-
 .highlighted {
 	font-weight: bolder;
 	background-color: rgb(255,255,0);
 }
+
+.selected {
+	font-weight: bolder;
+	background-color: rgb(0,128,255);
+}
+
