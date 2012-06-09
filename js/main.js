@@ -144,6 +144,7 @@
 
 			// add notes back
 			$.each(measure.noteDict, function (tick, notes) {
+				tick = parseInt(tick); //groan
 				if (!notes) {
 					return false;
 				}
@@ -152,29 +153,24 @@
 						var strings = measureView.find('.string');
 						var ticks = $(strings[note.stringNum]).find('.editable');
 						var noteStartTick = $(ticks[tick]);
-						noteStartTick.removeClass('duration').addClass('edited').text(note.value);
 
-						var nextTick = noteStartTick.next('span');
-						for (var i = 0; i < note.ticks - 1; ++i) {
-							if (!nextTick || nextTick.length == 0) {
-								// migrate to the next measure
-								var nextMeasure = TabRoll.model.measures[measureId + 1];
-								var nextMeasureView = $('#measure-' + (measureId + 1));
-								var nextStrings = nextMeasureView.find('.string');
-								var nextTicks = $(nextStrings[note.stringNum]).find('.editable');
-								nextTick = $(nextTicks[0]);
+						noteStartTick.removeClass('duration').addClass('edited').text(note.value);
+						var durationTicks = TabRoll.view.durationTicksForStartingNoteTick(noteStartTick);	
+
+						$.each(durationTicks, function (i, currentTick) {
+							if (!currentTick.hasClass('edited')) {
+								currentTick.addClass('duration').text('*');
 							}
-							if (!nextTick.hasClass('edited')) {
-								nextTick.addClass('duration').text('*');
-								nextTick = nextTick.next('span');
-							}
-						}
+						});
 						TabRoll.view.updateDurationIndicators(noteStartTick);
 					}
 				});
 			});
 		};
 
+		if (measureId < TabRoll.model.measures.length - 1) {
+			redrawMeasureId_(measureId+1);
+		}
 		redrawMeasureId_(measureId);
 		if (measureId > 0) {
 			redrawMeasureId_(measureId-1);
@@ -196,6 +192,27 @@
 		
 		measure.noteDict[tickPosition][stringNum] = null;
 		TabRoll.view.redrawMeasureId(measure.measureId);
+	};
+
+	TabRoll.view.durationTicksForStartingNoteTick = function (tickSpan) {
+		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
+		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
+		var note = TabRoll.controller.noteFromTickSpan(tickSpan);
+
+		durationTicks = [];
+		while (durationTicks.length < note.ticks - 1) {
+			tickPosition += 1;
+			if (tickPosition >= measure.ticks) {
+				measure = TabRoll.model.measures[measure.measureId + 1];
+				tickPosition = 0;
+			}
+			var measureView = $('#measure-' + measure.measureId);
+			var strings = measureView.find('.string');
+			var ticks = $(strings[note.stringNum]).find('.editable');
+			durationTicks.push($(ticks[tickPosition]));
+		}
+
+		return durationTicks;
 	};
 
 	TabRoll.controller.noteFromTickSpan = function (tickSpan) {
