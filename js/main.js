@@ -168,12 +168,9 @@
 			});
 		};
 
-		if (measureId < TabRoll.model.measures.length - 1) {
-			redrawMeasureId_(measureId+1);
-		}
-		redrawMeasureId_(measureId);
-		if (measureId > 0) {
-			redrawMeasureId_(measureId-1);
+		for (var i = TabRoll.model.measures.length - 1; i >= 0; i--) {
+			var measure = TabRoll.model.measures[i];
+			redrawMeasureId_(measure.measureId);
 		}
 	};
 
@@ -204,6 +201,9 @@
 			tickPosition += 1;
 			if (tickPosition >= measure.ticks) {
 				measure = TabRoll.model.measures[measure.measureId + 1];
+				if (!measure) {
+					break;
+				}
 				tickPosition = 0;
 			}
 			var measureView = $('#measure-' + measure.measureId);
