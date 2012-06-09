@@ -22,9 +22,9 @@
 	display:block;
 }
 
-.editable {
+.editable, .beatCount  {
 	padding-left: 2px;
-	opacity: .6;
+	opacity: .5;
 }
 
 .edited {

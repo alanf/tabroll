@@ -20,14 +20,26 @@
 		$('.measure').each(function (i, val) {
 			TabRoll.measures.push(new TabRoll.Measure(i, 32, {}));
 		});
+
+
+		$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
+			$('.signature').append('<span class="stringName">' + val + ' :|</span>');
+			$('.measure').append('<span class="string">');
+		});
+		$('.signature').append('<span class="stringName">c :|</span>');
+		$.each(['1', '2', '3', '4'], function(i, val) {
+			$('.measure').append('<span class="beatCount">'+ val + '</span>');
+			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">e</span>');
+			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">+</span>');
+			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">a</span>');
+			$('.measure').append('<span class="beatCount"> </span>');
+		});
  	};
 
 	TabRoll.setupNewTabRoll();
-
-	$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
-		$('.signature').append('<span class="stringName">' + val + ' :|</span>');
-		$('.measure').append('<span class="string">');
-	});
 
 	$('.string').each(function () {
 		for (var i = 0; i < 32; ++i) {
