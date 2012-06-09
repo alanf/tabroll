@@ -1,30 +1,33 @@
  var TabRoll = TabRoll || {};
+ TabRoll.model = TabRoll.model || {};
+ TabRoll.view = TabRoll.view || {};
+ TabRoll.controller = TabRoll.controller || {};
 
  $(document).ready(function() {
- 	TabRoll.Note = function (value, stringNum, ticks) {
+ 	TabRoll.model.Note = function (value, stringNum, ticks) {
  		this.value = value;
  		this.stringNum = stringNum;
  		this.ticks = ticks;
  	};
 
- 	TabRoll.Measure = function (measureId, ticks, noteDict) {
+ 	TabRoll.model.Measure = function (measureId, ticks, noteDict) {
  		this.measureId = measureId;
  		this.ticks = ticks;
  		this.noteDict = noteDict;
  	};
 
-	TabRoll.measures = [];
+	TabRoll.model.measures = [];
 
- 	TabRoll.setupNewTabRoll = function () {
+ 	TabRoll.controller.setupNewTabRoll = function () {
 		$('.measure').each(function (i, val) {
-			TabRoll.measures.push(new TabRoll.Measure(i, 32, {}));
+			TabRoll.model.measures.push(new TabRoll.model.Measure(i, 32, {}));
 		});
 
 		$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
 			$('.signature').append('<span class="stringName">' + val + ' :|</span>');
 			$('.measure').append('<span class="string">');
 		});
-		$('.signature').append('<span class="stringName">c :|</span>');
+		$('.signature').append('<span class="stringName">4/4|</span>');
 		$.each(['1', '2', '3', '4'], function(i, val) {
 			$('.measure').append('<span class="beatCount">'+ val + '</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
@@ -72,7 +75,7 @@
 			}
 			// backspace
 			if (e.keyCode == 8) {
-				TabRoll.deleteNoteAtTickSpan(highlighted);
+				TabRoll.controller.deleteNoteAtTickSpan(highlighted);
 			}
 		});
 	};
@@ -102,8 +105,8 @@
 		TabRoll.updateDurationIndicators();
 	};
 
-	TabRoll.redrawMeasure = function(measureId) {
-		var measure = TabRoll.measures[measureId];
+	TabRoll.view.redrawMeasure = function(measureId) {
+		var measure = TabRoll.model.measures[measureId];
 
 		// reset view
 		var measureView = $('#measure-' + measureId);
@@ -139,33 +142,33 @@
 		});
 	}
 	
-	TabRoll.addNoteToMeasure = function(note, measureId, tickPosition) {
-		var measure = TabRoll.measures[measureId];
+	TabRoll.controller.addNoteToMeasure = function(note, measureId, tickPosition) {
+		var measure = TabRoll.model.measures[measureId];
 		if (!measure.noteDict[tickPosition]) {
 			measure.noteDict[tickPosition] = [];
 		}
 		measure.noteDict[tickPosition][note.stringNum] = note;
-		TabRoll.redrawMeasure(measureId);
+		TabRoll.view.redrawMeasure(measureId);
 	};
 
-	TabRoll.deleteNoteAtTickSpan = function(tickSpan) {
-		var measureId = TabRoll.measureIdFromTickSpan(tickSpan);
-		var stringNum = TabRoll.stringNumberForTickSpan(tickSpan);
-		var tickPosition = TabRoll.tickPositionForTickSpan(tickSpan);
-		var measure = TabRoll.measures[measureId];
+	TabRoll.controller.deleteNoteAtTickSpan = function(tickSpan) {
+		var measureId = TabRoll.controller.measureIdFromTickSpan(tickSpan);
+		var stringNum = TabRoll.controller.stringNumberForTickSpan(tickSpan);
+		var tickPosition = TabRoll.controller.tickPositionForTickSpan(tickSpan);
+		var measure = TabRoll.model.measures[measureId];
 		
 		measure.noteDict[tickPosition][stringNum] = null;
-		TabRoll.redrawMeasure(measureId);
+		TabRoll.view.redrawMeasure(measureId);
 	};
 
-	TabRoll.measureIdFromTickSpan = function (tickSpan) {
+	TabRoll.controller.measureIdFromTickSpan = function (tickSpan) {
 			var stringView = tickSpan.parent();
 			var measureView = stringView.parent(); 
 			var measureId = measureView.attr('id').split('-')[1];
 			return measureId;
 	};
 
-	TabRoll.stringNumberForTickSpan = function (tickSpan) {
+	TabRoll.controller.stringNumberForTickSpan = function (tickSpan) {
 		var stringView = tickSpan.parent();
 		var measureView = stringView.parent(); 
 
@@ -178,7 +181,7 @@
 		return stringNum;
 	};
 
-	TabRoll.tickPositionForTickSpan = function (tickSpan) {
+	TabRoll.controller.tickPositionForTickSpan = function (tickSpan) {
 		var stringView = tickSpan.parent();
 
 		position = -1;
@@ -194,18 +197,18 @@
 		$('.selected').each(function (i, element) {
 			var selected = $(element);
 
-			var stringNum = TabRoll.stringNumberForTickSpan(selected);
-			var note = new TabRoll.Note(e.which - 48, stringNum, 4);
+			var stringNum = TabRoll.controller.stringNumberForTickSpan(selected);
+			var note = new TabRoll.model.Note(e.which - 48, stringNum, 4);
 
-			var measureId = TabRoll.measureIdFromTickSpan(selected);
-			var tickPosition = TabRoll.tickPositionForTickSpan(selected);
+			var measureId = TabRoll.controller.measureIdFromTickSpan(selected);
+			var tickPosition = TabRoll.controller.tickPositionForTickSpan(selected);
 			
-			TabRoll.addNoteToMeasure(note, measureId, tickPosition);
+			TabRoll.controller.addNoteToMeasure(note, measureId, tickPosition);
 		});
 
 		$('.selected').removeClass('selected');
 	});
 
 	// kick off
-	TabRoll.setupNewTabRoll();
+	TabRoll.controller.setupNewTabRoll();
 });
