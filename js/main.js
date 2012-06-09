@@ -1,10 +1,14 @@
  $(document).ready(function() {
 	$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
-		var row = $('.staff').append(val + ' :|');
+		$('.signature').append('<span class="stringName">' + val + ' :|</span>');
+		$('.measure').append('<span class="string">');
+	});
+
+	$('.string').each(function() {
 		for (var i = 0; i < 32; ++i) {
-			$(row).append('<span class="editable">-</span>');
+			$(this).append('<span class="editable">-</span>');
 		}
-		$(row).append('|<br>');
+		$(this).append('|</span>');
 	});
 
 	$('.editable').mouseenter(function () {

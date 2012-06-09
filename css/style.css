@@ -2,6 +2,26 @@
 	font-family: monospace
 }
 
+.signature {
+	display:inline-block;
+}
+
+.stringName {
+	display:block;
+}
+
+.staff {
+	display:inline-block;
+}
+
+.measure {
+	display:inline-block;
+}
+
+.string {
+	display:block;
+}
+
 .editable {
 	padding-left: 2px;
 	opacity: .6;
