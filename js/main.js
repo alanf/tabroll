@@ -20,7 +20,6 @@
 			TabRoll.measures.push(new TabRoll.Measure(i, 32, {}));
 		});
 
-
 		$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
 			$('.signature').append('<span class="stringName">' + val + ' :|</span>');
 			$('.measure').append('<span class="string">');
@@ -36,33 +35,50 @@
 			$('.measure').append('<span class="beatCount">a</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
 		});
- 	};
 
-	TabRoll.setupNewTabRoll();
+		$('.string').each(function () {
+			for (var i = 0; i < 32; ++i) {
+				$(this).append('<span class="editable">-</span>');
+			}
+			$(this).append('|</span>');
+		});
 
-	$('.string').each(function () {
-		for (var i = 0; i < 32; ++i) {
-			$(this).append('<span class="editable">-</span>');
-		}
-		$(this).append('|</span>');
-	});
+		$('.editable').mouseenter(function () {
+			$(this).addClass('highlighted');
+		});
 
-	$('.editable').mouseenter(function () {
-		$(this).addClass('highlighted');
-	});
+		$('.editable').mouseleave(function () {
+			$(this).removeClass('highlighted');
+		});
 
-	$('.editable').mouseleave(function () {
-		$(this).removeClass('highlighted');
-	});
+		$('.editable').click(function () {
+			$('.selected').removeClass('selected');
+			$(this).addClass('selected');
+			this.textContent = '-';
+		});
 
-	$('.editable').click(function () {
-		$('.selected').removeClass('selected');
-		$(this).addClass('selected');
-		this.textContent = '-';
-	});
+		$(document).keyup(function (e) {
+			var highlighted = $('.highlighted');
+			if (!highlighted.hasClass('edited')) {
+				return;
+			}
+			// arrow left
+			if (e.keyCode == 37) {
+				TabRoll.reduceDuration();
+			}
+			// arrow right
+			if (e.keyCode == 39) {
+				TabRoll.extendDuration();
+			}
+			// backspace
+			if (e.keyCode == 8) {
+				TabRoll.deleteNoteAtTickSpan(highlighted);
+			}
+		});
+	};
 
 	TabRoll.updateDurationIndicators = function() {
-		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
+		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration):not(.edited)');
 		var i = 15;
 		durationIndicators.each(function () {
 			$(this).fadeTo(.2, i / 15.0);
@@ -86,44 +102,16 @@
 		TabRoll.updateDurationIndicators();
 	};
 
-	TabRoll.deleteNote = function() {
-		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
-		durationIndicators.each(function () {
-			toRemove = $(this);
-			toRemove.removeClass('duration').removeClass('edited').text('-').fadeTo(.2, .6);
-		});
-
-		$('.highlighted').removeClass('selected').removeClass('edited').removeClass('highlighted').text('-');
-	};
-
-	$(document).keyup(function (e) {
-		// arrow left
-		if (e.keyCode == 37 && $('.highlighted').hasClass('edited')) {
-			TabRoll.reduceDuration();
-		}
-		// arrow right
-		if (e.keyCode == 39 && $('.highlighted').hasClass('edited')) {
-			TabRoll.extendDuration();
-		}
-		// backspace
-		if (e.keyCode == 8 && $('.highlighted').hasClass('edited')) {
-			TabRoll.deleteNote();
-		}
-	});
-
-
-	
-	TabRoll.addNoteToMeasure = function(note, measureId, tickPosition) {
+	TabRoll.redrawMeasure = function(measureId) {
 		var measure = TabRoll.measures[measureId];
-		if (!measure.noteDict[tickPosition]) {
-			measure.noteDict[tickPosition] = [];
-		}
-		measure.noteDict[tickPosition][note.stringNum] = note;
 
 		// reset view
 		var measureView = $('#measure-' + measureId);
-		measureView.find('.editable').each(function () {
-			$(this).removeClass('edited').removeClass('duration').text('-');
+		measureView.find('.edited').each(function () {
+			$(this).removeClass('edited').text('-').removeAttr('style');
+		});
+		measureView.find('.duration').each(function () {
+			$(this).removeClass('duration').text('-').removeAttr('style');
 		});
 
 		// add notes back
@@ -136,7 +124,7 @@
 					var strings = measureView.find('.string');
 					var ticks = $(strings[note.stringNum]).find('.editable');
 					var noteStartTick = $(ticks[tick]);
-					noteStartTick.addClass('edited').text(note.value);
+					noteStartTick.removeClass('duration').addClass('edited').text(note.value);
 
 					var nextTick = noteStartTick.next('span');
 					for (var i = 0; i < note.ticks; ++i) {
@@ -149,32 +137,75 @@
 				}
 			});
 		});
+	}
+	
+	TabRoll.addNoteToMeasure = function(note, measureId, tickPosition) {
+		var measure = TabRoll.measures[measureId];
+		if (!measure.noteDict[tickPosition]) {
+			measure.noteDict[tickPosition] = [];
+		}
+		measure.noteDict[tickPosition][note.stringNum] = note;
+		TabRoll.redrawMeasure(measureId);
+	};
+
+	TabRoll.deleteNoteAtTickSpan = function(tickSpan) {
+		var measureId = TabRoll.measureIdFromTickSpan(tickSpan);
+		var stringNum = TabRoll.stringNumberForTickSpan(tickSpan);
+		var tickPosition = TabRoll.tickPositionForTickSpan(tickSpan);
+		var measure = TabRoll.measures[measureId];
+		
+		measure.noteDict[tickPosition][stringNum] = null;
+		TabRoll.redrawMeasure(measureId);
+	};
+
+	TabRoll.measureIdFromTickSpan = function (tickSpan) {
+			var stringView = tickSpan.parent();
+			var measureView = stringView.parent(); 
+			var measureId = measureView.attr('id').split('-')[1];
+			return measureId;
+	};
+
+	TabRoll.stringNumberForTickSpan = function (tickSpan) {
+		var stringView = tickSpan.parent();
+		var measureView = stringView.parent(); 
+
+		var stringNum = -1;
+		measureView.find('.string').each(function (num, element) {
+			if ($(element).is(stringView)) {
+				stringNum = num;
+			}	
+		});	
+		return stringNum;
+	};
+
+	TabRoll.tickPositionForTickSpan = function (tickSpan) {
+		var stringView = tickSpan.parent();
+
+		position = -1;
+		stringView.find('.editable').each(function (tickPosition, element) {
+			if ($(element).is(tickSpan)) {
+				position = tickPosition;
+			}	
+		});
+		return position;
 	};
 
 	$(document).keypress(function (e) {
-		$('.selected').each(function () {
-			var selected = $(this);
+		$('.selected').each(function (i, element) {
+			var selected = $(element);
 
-			var stringView = selected.parent();
-			var measureView = stringView.parent(); 
-
-			var stringNum = 0;
-			measureView.find('.string').each(function (num, element) {
-				if ($(element).is(stringView)) {
-					stringNum = num;
-				}	
-			});	
+			var stringNum = TabRoll.stringNumberForTickSpan(selected);
 			var note = new TabRoll.Note(e.which - 48, stringNum, 4);
 
-
-			var measureId = measureView.attr('id').split('-')[1];
-			stringView.find('.editable').each(function (tickPosition, element) {
-				if ($(element).is(selected)) {
-					TabRoll.addNoteToMeasure(note, measureId, tickPosition);
-				}
-			});
+			var measureId = TabRoll.measureIdFromTickSpan(selected);
+			var tickPosition = TabRoll.tickPositionForTickSpan(selected);
+			
+			TabRoll.addNoteToMeasure(note, measureId, tickPosition);
 		});
 
 		$('.selected').removeClass('selected');
 	});
+
+	// kick off
+	TabRoll.setupNewTabRoll();
 });
