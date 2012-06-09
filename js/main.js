@@ -33,10 +33,7 @@
 	var reduceDuration = function() {
 		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
 		var toRemove = durationIndicators.last();
-		toRemove.removeClass('duration');
-		toRemove.removeClass('edited');
-		toRemove.text('-');
-		toRemove.fadeTo(.2, .6);
+		toRemove.removeClass('duration').removeClass('edited').text('-').fadeTo(.2, .6);
 
 		updateDurationIndicators();
 	}
@@ -44,8 +41,7 @@
 	var extendDuration = function() {
 		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
 		var nextIndicator = durationIndicators.last().next();
-		nextIndicator.addClass('duration');
-		nextIndicator.text('*');
+		nextIndicator.addClass('duration').text('*');
 
 		updateDurationIndicators();
 	};
@@ -54,20 +50,19 @@
 		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration)');
 		durationIndicators.each(function () {
 			toRemove = $(this);
-			toRemove.removeClass('duration');
-			toRemove.removeClass('edited');
-			toRemove.text('-');
-			toRemove.fadeTo(.2, .6);
+			toRemove.removeClass('duration').removeClass('edited').text('-').fadeTo(.2, .6);
 		});
 
-		$('.highlighted').removeClass('edited').removeClass('highlighted').text('-');
+		$('.highlighted').removeClass('selected').removeClass('edited').removeClass('highlighted').text('-');
 	};
 
 	$(document).keyup(function (e) {
+		// arrow left
 		if (e.keyCode == 37 && $('.highlighted').hasClass('edited')) {
 			reduceDuration();
 		}
 
+		// arrow right
 		if (e.keyCode == 39 && $('.highlighted').hasClass('edited')) {
 			extendDuration();
 		}
@@ -80,15 +75,14 @@
 
 	$(document).keypress(function (e) {
 		$('.selected').each(function () {
-			this.textContent = e.which - 48;
-			$(this).addClass('edited');
-			$(this).removeClass('duration');
+			var selected = $(this);
+			selected.text(e.which - 48).addClass('edited').removeClass('duration');
 
+			// draw duration indicators 
 			var nextTick = $(this).next('span');
 			for (var i = 0; i < 3; ++i) {
 				if (nextTick.hasClass('editable')) {
-					nextTick.addClass('duration');
-					nextTick.text('*');
+					nextTick.addClass('duration').text('*');
 					nextTick = nextTick.next('span');
 				}
 			}
