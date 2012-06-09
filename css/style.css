@@ -4,6 +4,8 @@
 
 .signature {
 	display:inline-block;
+	float: left;
+	width: 30px;
 }
 
 .stringName {
@@ -23,8 +25,10 @@
 }
 
 .editable, .beatCount  {
-	padding-left: 2px;
-	opacity: .5;
+	opacity: .4;
+	float: left;
+	width: 12px;
+	text-align: center;
 }
 
 .sixteenth {
@@ -36,7 +40,7 @@
 }
 
 .quarter {
-	opacity:.8;
+	opacity:.85;
 }
 
 .edited {

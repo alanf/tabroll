@@ -40,13 +40,13 @@
 		$('.signature').append('<span class="stringName">4/4|</span>');
 		$.each(['1', '2', '3', '4'], function(i, val) {
 			$('.measure').append('<span class="beatCount quarter">'+ val + '</span>');
-			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">&nbsp;</span>');
 			$('.measure').append('<span class="beatCount sixteenth">e</span>');
-			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">&nbsp;</span>');
 			$('.measure').append('<span class="beatCount eighth">+</span>');
-			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">&nbsp;</span>');
 			$('.measure').append('<span class="beatCount sixteenth">a</span>');
-			$('.measure').append('<span class="beatCount"> </span>');
+			$('.measure').append('<span class="beatCount">&nbsp;</span>');
 		});
 
 		$('.string').each(function () {
