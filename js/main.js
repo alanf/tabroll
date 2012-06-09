@@ -29,19 +29,29 @@
 		});
 		$('.signature').append('<span class="stringName">4/4|</span>');
 		$.each(['1', '2', '3', '4'], function(i, val) {
-			$('.measure').append('<span class="beatCount">'+ val + '</span>');
+			$('.measure').append('<span class="beatCount quarter">'+ val + '</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
-			$('.measure').append('<span class="beatCount">e</span>');
+			$('.measure').append('<span class="beatCount sixteenth">e</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
-			$('.measure').append('<span class="beatCount">+</span>');
+			$('.measure').append('<span class="beatCount eighth">+</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
-			$('.measure').append('<span class="beatCount">a</span>');
+			$('.measure').append('<span class="beatCount sixteenth">a</span>');
 			$('.measure').append('<span class="beatCount"> </span>');
 		});
 
 		$('.string').each(function () {
 			for (var i = 0; i < 32; ++i) {
-				$(this).append('<span class="editable">-</span>');
+
+				var clazz = 'editable';
+				if (i % 8 == 0) {
+					clazz += ' quarter'; 
+				} else if (i % 4 == 0) {
+					clazz += ' eighth';
+				} else if (i % 2 == 0) {
+					clazz += ' sixteenth';
+				}
+
+				$(this).append('<span class="'+ clazz + '">-</span>');
 			}
 			$(this).append('|</span>');
 		});
@@ -130,7 +140,7 @@
 					noteStartTick.removeClass('duration').addClass('edited').text(note.value);
 
 					var nextTick = noteStartTick.next('span');
-					for (var i = 0; i < note.ticks; ++i) {
+					for (var i = 0; i < note.ticks - 1; ++i) {
 						if (nextTick.hasClass('editable')) {
 							nextTick.addClass('duration').text('*');
 							nextTick = nextTick.next('span');
@@ -198,7 +208,7 @@
 			var selected = $(element);
 
 			var stringNum = TabRoll.controller.stringNumberForTickSpan(selected);
-			var note = new TabRoll.model.Note(e.which - 48, stringNum, 4);
+			var note = new TabRoll.model.Note(e.which - 48, stringNum, 8);
 
 			var measureId = TabRoll.controller.measureIdFromTickSpan(selected);
 			var tickPosition = TabRoll.controller.tickPositionForTickSpan(selected);

@@ -27,6 +27,18 @@
 	opacity: .5;
 }
 
+.sixteenth {
+	opacity:.6;
+}
+
+.eighth {
+	opacity:.7;
+}
+
+.quarter {
+	opacity:.8;
+}
+
 .edited {
 	font-weight: bold;
 	opacity: 1.0;
