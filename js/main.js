@@ -80,8 +80,8 @@
 		});
 	};
 
-	TabRoll.updateDurationIndicators = function() {
-		var durationIndicators = $('.highlighted').nextUntil('.editable:not(.duration):not(.edited)');
+	TabRoll.updateDurationIndicators = function(noteStartSpan) {
+		var durationIndicators = noteStartSpan.nextUntil('.editable:not(.duration):not(.edited)');
 		var i = 15;
 		durationIndicators.each(function () {
 			$(this).fadeTo(.2, i / 15.0);
@@ -94,7 +94,7 @@
 		var toRemove = durationIndicators.last();
 		toRemove.removeClass('duration').removeClass('edited').text('-').fadeTo(.2, .6);
 
-		TabRoll.updateDurationIndicators();
+		TabRoll.updateDurationIndicators($('.highlighted'));
 	}
 
 	TabRoll.extendDuration = function() {
@@ -102,7 +102,7 @@
 		var nextIndicator = durationIndicators.last().next();
 		nextIndicator.addClass('duration').text('*');
 
-		TabRoll.updateDurationIndicators();
+		TabRoll.updateDurationIndicators($('.highlighted'));
 	};
 
 	TabRoll.view.redrawMeasure = function(measureId) {
@@ -136,7 +136,7 @@
 							nextTick = nextTick.next('span');
 						}
 					}
-					TabRoll.updateDurationIndicators();
+					TabRoll.updateDurationIndicators(noteStartTick);
 				}
 			});
 		});
