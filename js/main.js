@@ -130,42 +130,57 @@
 	};
 
 	TabRoll.view.redrawMeasureId = function(measureId) {
-		var measure = TabRoll.model.measures[measureId];
+		var redrawMeasureId_ = function(measureId) {
+			var measure = TabRoll.model.measures[measureId];
 
-		// reset view
-		var measureView = $('#measure-' + measureId);
-		measureView.find('.edited').each(function () {
-			$(this).removeClass('edited').text('-').removeAttr('style');
-		});
-		measureView.find('.duration').each(function () {
-			$(this).removeClass('duration').text('-').removeAttr('style');
-		});
-
-		// add notes back
-		$.each(measure.noteDict, function (tick, notes) {
-			if (!notes) {
-				return false;
-			}
-			$.each(notes, function (i, note) {
-				if (note) {
-					var strings = measureView.find('.string');
-					var ticks = $(strings[note.stringNum]).find('.editable');
-					var noteStartTick = $(ticks[tick]);
-					noteStartTick.removeClass('duration').addClass('edited').text(note.value);
-
-					var nextTick = noteStartTick.next('span');
-					for (var i = 0; i < note.ticks - 1; ++i) {
-						if (nextTick.hasClass('editable')) {
-							nextTick.addClass('duration').text('*');
-							nextTick = nextTick.next('span');
-						}
-					}
-					TabRoll.view.updateDurationIndicators(noteStartTick);
-				}
+			// reset view
+			var measureView = $('#measure-' + measureId);
+			measureView.find('.edited').each(function () {
+				$(this).removeClass('edited').text('-').removeAttr('style');
 			});
-		});
-	}
-	
+			measureView.find('.duration').each(function () {
+				$(this).removeClass('duration').text('-').removeAttr('style');
+			});
+
+			// add notes back
+			$.each(measure.noteDict, function (tick, notes) {
+				if (!notes) {
+					return false;
+				}
+				$.each(notes, function (i, note) {
+					if (note) {
+						var strings = measureView.find('.string');
+						var ticks = $(strings[note.stringNum]).find('.editable');
+						var noteStartTick = $(ticks[tick]);
+						noteStartTick.removeClass('duration').addClass('edited').text(note.value);
+
+						var nextTick = noteStartTick.next('span');
+						for (var i = 0; i < note.ticks - 1; ++i) {
+							if (!nextTick || nextTick.length == 0) {
+								// migrate to the next measure
+								var nextMeasure = TabRoll.model.measures[measureId + 1];
+								var nextMeasureView = $('#measure-' + (measureId + 1));
+								var nextStrings = nextMeasureView.find('.string');
+								var nextTicks = $(nextStrings[note.stringNum]).find('.editable');
+								nextTick = $(nextTicks[0]);
+							}
+							if (!nextTick.hasClass('edited')) {
+								nextTick.addClass('duration').text('*');
+								nextTick = nextTick.next('span');
+							}
+						}
+						TabRoll.view.updateDurationIndicators(noteStartTick);
+					}
+				});
+			});
+		};
+
+		redrawMeasureId_(measureId);
+		if (measureId > 0) {
+			redrawMeasureId_(measureId-1);
+		}
+	};
+
 	TabRoll.controller.addNoteToMeasure = function(note, measure, tickPosition) {
 		if (!measure.noteDict[tickPosition]) {
 			measure.noteDict[tickPosition] = [];
