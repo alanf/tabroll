@@ -97,12 +97,15 @@
 		});
 	};
 
+	TabRoll.controller.workingNoteDuration = 8;
+
 	TabRoll.controller.reduceDuration = function(tickSpan) {
 		var note = TabRoll.controller.noteFromTickSpan(tickSpan);
 		if (note.ticks < 2) {
 			return;
 		}
 		note.ticks -= 1;
+		TabRoll.controller.workingNoteDuration = note.ticks;
 
 		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
 		TabRoll.view.redrawMeasureId(measure.measureId);
@@ -111,6 +114,7 @@
 	TabRoll.controller.extendDuration = function(tickSpan) {
 		var note = TabRoll.controller.noteFromTickSpan(tickSpan);
 		note.ticks += 1;
+		TabRoll.controller.workingNoteDuration = note.ticks;
 
 		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
 		TabRoll.view.redrawMeasureId(measure.measureId);
@@ -272,7 +276,7 @@
 			}
 
 			var stringNum = TabRoll.controller.stringNumberFromTickSpan(selected);
-			var note = new TabRoll.model.Note(currentText, stringNum, 8);
+			var note = new TabRoll.model.Note(currentText, stringNum, TabRoll.controller.workingNoteDuration);
 
 			var measure = TabRoll.controller.measureFromTickSpan(selected);
 			var tickPosition = TabRoll.controller.tickPositionFromTickSpan(selected);
