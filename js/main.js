@@ -94,10 +94,6 @@
 			if (e.keyCode == 39) {
 				TabRoll.controller.extendDuration(highlighted);
 			}
-			// backspace
-			if (e.keyCode == 8) {
-				TabRoll.controller.deleteNoteAtTickSpan(highlighted);
-			}
 		});
 	};
 
@@ -257,6 +253,15 @@
 	};
 
 	$(document).keypress(function (e) {
+		// x
+		if (e.which == 120 && $('.highlighted')) {
+			TabRoll.controller.deleteNoteAtTickSpan($('.highlighted'));
+		}
+
+		if (e.which < 47 || e.which > 58) {
+			return;
+		}
+
 		$('.selected').each(function (i, element) {
 			var selected = $(element);
 			var currentText = selected.text();
