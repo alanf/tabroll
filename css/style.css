@@ -75,3 +75,8 @@
 .visibleDiv p {
 	font-size: 11px;
 }
+
+button {
+	margin-top: 5px;
+	float: right;
+}

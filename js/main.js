@@ -28,30 +28,28 @@
 
 	TabRoll.model.measures = [];
 
- 	TabRoll.controller.setupNewTabRoll = function () {
-		$('.measure').each(function (i, val) {
-			TabRoll.model.measures.push(new TabRoll.model.Measure(i, 32, {}));
-		});
-
+	TabRoll.controller.populateStaffSpan = function (staffSpan) {
+		// TODO: move into view method
+		// the signature at the head of each line
 		$.each(['e', 'b', 'g', 'D', 'A', 'E'], function(i, val) {
-			$('.signature').append('<span class="stringName">' + val + ' :|</span>');
-			$('.measure').append('<span class="string">');
+			staffSpan.find('.signature').append('<span class="stringName">' + val + ' :|</span>');
+			staffSpan.find('.measure').append('<span class="string">');
 		});
-		$('.signature').append('<span class="stringName">4/4|</span>');
+		staffSpan.find('.signature').append('<span class="stringName">4/4|</span>');
+		// the beat markers
 		$.each(['1', '2', '3', '4'], function(i, val) {
-			$('.measure').append('<span class="beatCount quarter">'+ val + '</span>');
-			$('.measure').append('<span class="beatCount">&nbsp;</span>');
-			$('.measure').append('<span class="beatCount sixteenth">e</span>');
-			$('.measure').append('<span class="beatCount">&nbsp;</span>');
-			$('.measure').append('<span class="beatCount eighth">+</span>');
-			$('.measure').append('<span class="beatCount">&nbsp;</span>');
-			$('.measure').append('<span class="beatCount sixteenth">a</span>');
-			$('.measure').append('<span class="beatCount">&nbsp;</span>');
+			staffSpan.find('.measure').append('<span class="beatCount quarter">'+ val + '</span>');
+			staffSpan.find('.measure').append('<span class="beatCount">&nbsp;</span>');
+			staffSpan.find('.measure').append('<span class="beatCount sixteenth">e</span>');
+			staffSpan.find('.measure').append('<span class="beatCount">&nbsp;</span>');
+			staffSpan.find('.measure').append('<span class="beatCount eighth">+</span>');
+			staffSpan.find('.measure').append('<span class="beatCount">&nbsp;</span>');
+			staffSpan.find('.measure').append('<span class="beatCount sixteenth">a</span>');
+			staffSpan.find('.measure').append('<span class="beatCount">&nbsp;</span>');
 		});
-
-		$('.string').each(function () {
+		// the individual editable ticks that comprise a measure
+		staffSpan.find('.string').each(function () {
 			for (var i = 0; i < 32; ++i) {
-
 				var clazz = 'editable';
 				if (i % 8 == 0) {
 					clazz += ' quarter'; 
@@ -60,26 +58,44 @@
 				} else if (i % 2 == 0) {
 					clazz += ' sixteenth';
 				}
-
 				$(this).append('<span class="'+ clazz + '">-</span>');
 			}
 			$(this).append('|</span>');
 		});
 
-		$('.editable').mouseenter(function () {
+		staffSpan.find('.editable').mouseenter(function () {
 			$(this).addClass('highlighted');
 		});
 
-		$('.editable').mouseleave(function () {
+		staffSpan.find('.editable').mouseleave(function () {
 			$(this).removeClass('highlighted');
 		});
 
-		$('.editable').click(function () {
+		staffSpan.find('.editable').click(function () {
 			window.clearTimeout();
 			$('.selected').removeClass('selected');
 			$(this).addClass('selected');
 			this.textContent = '-';
 		});
+
+		staffSpan.find('.addStaffBtn').click(function () {
+			var previousMeasure = $(this).siblings('.measure').last();
+			var measureId = previousMeasure.attr('id').split('-')[1];
+			
+			// TODO: move to controller (didAddMeasuresAfterMeasureId...)
+			TabRoll.model.measures.splice(measureId, 0, new TabRoll.model.Measure(measureId, 32, {}));
+			TabRoll.model.measures.splice(measureId, 0, new TabRoll.model.Measure(measureId, 32, {}));
+
+			var existingStaffSpan = $(this).parent('.staff').after('<span class="staff"><span class="signature"></span><span id="measure-2" class="measure"></span><span id="measure-3" class="measure"></span><br><button class="addStaffBtn">+</button></span><br>');
+			TabRoll.controller.populateStaffSpan(existingStaffSpan.next('.staff'));
+			TabRoll.controller.updateMeasureIds();
+		});
+	};
+
+ 	TabRoll.controller.setupNewTabRoll = function () {
+		TabRoll.model.measures.push(new TabRoll.model.Measure(0, 32, {}));
+		TabRoll.model.measures.push(new TabRoll.model.Measure(1, 32, {}));
+		TabRoll.controller.populateStaffSpan($('.staff'));
 
 		$(document).keyup(function (e) {
 			var highlighted = $('.highlighted');
@@ -95,6 +111,15 @@
 				TabRoll.controller.extendDuration(highlighted);
 			}
 		});
+	};
+
+	TabRoll.controller.updateMeasureIds = function () {
+		$('.measure').each(function (i, element) {
+			$(element).attr('id', 'measure-' + i);
+		});
+		for (var i = 0; i < TabRoll.model.measures.length; ++i) {
+			TabRoll.model.measures[i].measureId = i;
+		}
 	};
 
 	TabRoll.controller.workingNoteDuration = 8;
