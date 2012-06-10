@@ -75,6 +75,7 @@
 		});
 
 		$('.editable').click(function () {
+			window.clearTimeout();
 			$('.selected').removeClass('selected');
 			$(this).addClass('selected');
 			this.textContent = '-';
@@ -100,16 +101,6 @@
 		});
 	};
 
-	TabRoll.view.updateDurationIndicators = function(noteStartSpan) {
-		var durationIndicators = noteStartSpan.nextUntil('.editable:not(.duration):not(.edited)');
-
-		var i = 50.0;
-		durationIndicators.each(function () {
-			$(this).fadeTo(.2, i / 50.0);
-			i -= i / 10;
-		});
-	};
-	
 	TabRoll.controller.reduceDuration = function(tickSpan) {
 		var note = TabRoll.controller.noteFromTickSpan(tickSpan);
 		if (note.ticks < 2) {
@@ -129,6 +120,73 @@
 		TabRoll.view.redrawMeasureId(measure.measureId);
 	};
 
+	TabRoll.controller.addNoteToMeasure = function(note, measure, tickPosition) {
+		if (!measure.noteDict[tickPosition]) {
+			measure.noteDict[tickPosition] = [];
+		}
+		measure.noteDict[tickPosition][note.stringNum] = note;
+		TabRoll.view.redrawMeasureId(measure.measureId);
+	};
+
+	TabRoll.controller.deleteNoteAtTickSpan = function(tickSpan) {
+		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
+		var stringNum = TabRoll.controller.stringNumberFromTickSpan(tickSpan);
+		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
+		
+		measure.noteDict[tickPosition][stringNum] = null;
+		TabRoll.view.redrawMeasureId(measure.measureId);
+	};
+
+	TabRoll.controller.noteFromTickSpan = function (tickSpan) {
+		var stringNum = TabRoll.controller.stringNumberFromTickSpan(tickSpan);
+		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
+		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
+
+		return measure.noteFromStringNumberAndTickPosition(stringNum, tickPosition);
+	};
+
+	TabRoll.controller.measureFromTickSpan = function (tickSpan) {
+			var stringView = tickSpan.parent();
+			var measureView = stringView.parent(); 
+			var measureId = measureView.attr('id').split('-')[1];
+			return TabRoll.model.measures[measureId];
+	};
+
+	TabRoll.controller.stringNumberFromTickSpan = function (tickSpan) {
+		var stringView = tickSpan.parent();
+		var measureView = stringView.parent(); 
+
+		var stringNum = -1;
+		measureView.find('.string').each(function (num, element) {
+			if ($(element).is(stringView)) {
+				stringNum = num;
+			}	
+		});	
+		return stringNum;
+	};
+
+	TabRoll.controller.tickPositionFromTickSpan = function (tickSpan) {
+		var stringView = tickSpan.parent();
+
+		position = -1;
+		stringView.find('.editable').each(function (tickPosition, element) {
+			if ($(element).is(tickSpan)) {
+				position = tickPosition;
+			}	
+		});
+		return position;
+	};
+
+	TabRoll.view.updateDurationIndicators = function(noteStartSpan) {
+		var durationIndicators = noteStartSpan.nextUntil('.editable:not(.duration):not(.edited)');
+
+		var i = 50.0;
+		durationIndicators.each(function () {
+			$(this).fadeTo(.2, i / 50.0);
+			i -= i / 10;
+		});
+	};
+	
 	TabRoll.view.redrawMeasureId = function(measureId) {
 		var redrawMeasureId_ = function(measureId) {
 			var measure = TabRoll.model.measures[measureId];
@@ -174,23 +232,6 @@
 		}
 	};
 
-	TabRoll.controller.addNoteToMeasure = function(note, measure, tickPosition) {
-		if (!measure.noteDict[tickPosition]) {
-			measure.noteDict[tickPosition] = [];
-		}
-		measure.noteDict[tickPosition][note.stringNum] = note;
-		TabRoll.view.redrawMeasureId(measure.measureId);
-	};
-
-	TabRoll.controller.deleteNoteAtTickSpan = function(tickSpan) {
-		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
-		var stringNum = TabRoll.controller.stringNumberFromTickSpan(tickSpan);
-		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
-		
-		measure.noteDict[tickPosition][stringNum] = null;
-		TabRoll.view.redrawMeasureId(measure.measureId);
-	};
-
 	TabRoll.view.durationTicksForStartingNoteTick = function (tickSpan) {
 		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
 		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
@@ -215,52 +256,18 @@
 		return durationTicks;
 	};
 
-	TabRoll.controller.noteFromTickSpan = function (tickSpan) {
-		var stringNum = TabRoll.controller.stringNumberFromTickSpan(tickSpan);
-		var tickPosition = TabRoll.controller.tickPositionFromTickSpan(tickSpan);
-		var measure = TabRoll.controller.measureFromTickSpan(tickSpan);
-
-		return measure.noteFromStringNumberAndTickPosition(stringNum, tickPosition);
-	};
-
-	TabRoll.controller.measureFromTickSpan = function (tickSpan) {
-			var stringView = tickSpan.parent();
-			var measureView = stringView.parent(); 
-			var measureId = measureView.attr('id').split('-')[1];
-			return TabRoll.model.measures[measureId];
-	};
-
-	TabRoll.controller.stringNumberFromTickSpan = function (tickSpan) {
-		var stringView = tickSpan.parent();
-		var measureView = stringView.parent(); 
-
-		var stringNum = -1;
-		measureView.find('.string').each(function (num, element) {
-			if ($(element).is(stringView)) {
-				stringNum = num;
-			}	
-		});	
-		return stringNum;
-	};
-
-	TabRoll.controller.tickPositionFromTickSpan = function (tickSpan) {
-		var stringView = tickSpan.parent();
-
-		position = -1;
-		stringView.find('.editable').each(function (tickPosition, element) {
-			if ($(element).is(tickSpan)) {
-				position = tickPosition;
-			}	
-		});
-		return position;
-	};
-
 	$(document).keypress(function (e) {
 		$('.selected').each(function (i, element) {
 			var selected = $(element);
+			var currentText = selected.text();
+			if (currentText == '1' || currentText == '2') {
+				currentText += e.which - 48;	
+			} else {
+				currentText = e.which - 48;
+			}
 
 			var stringNum = TabRoll.controller.stringNumberFromTickSpan(selected);
-			var note = new TabRoll.model.Note(e.which - 48, stringNum, 8);
+			var note = new TabRoll.model.Note(currentText, stringNum, 8);
 
 			var measure = TabRoll.controller.measureFromTickSpan(selected);
 			var tickPosition = TabRoll.controller.tickPositionFromTickSpan(selected);
@@ -268,7 +275,9 @@
 			TabRoll.controller.addNoteToMeasure(note, measure, tickPosition);
 		});
 
-		$('.selected').removeClass('selected');
+		window.setTimeout(function () {
+			$('.selected').removeClass('selected');
+		}, 200);
 	});
 
 	// kick off
