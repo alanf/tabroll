@@ -80,11 +80,11 @@
 
 		staffSpan.find('.addStaffBtn').click(function () {
 			var previousMeasure = $(this).siblings('.measure').last();
-			var measureId = previousMeasure.attr('id').split('-')[1];
+			var measureId = TabRoll.controller.measureIdFromMeasureView(previousMeasure);
 			
 			// TODO: move to controller (didAddMeasuresAfterMeasureId...)
-			TabRoll.model.measures.splice(measureId, 0, new TabRoll.model.Measure(measureId, 32, {}));
-			TabRoll.model.measures.splice(measureId, 0, new TabRoll.model.Measure(measureId, 32, {}));
+			TabRoll.model.measures.splice(measureId+1, 0, new TabRoll.model.Measure(measureId, 32, {}));
+			TabRoll.model.measures.splice(measureId+2, 0, new TabRoll.model.Measure(measureId, 32, {}));
 
 			var existingStaffSpan = $(this).parent('.staff').after('<span class="staff"><span class="signature"></span><span id="measure-2" class="measure"></span><span id="measure-3" class="measure"></span><br><button class="addStaffBtn">+</button></span><br>');
 			TabRoll.controller.populateStaffSpan(existingStaffSpan.next('.staff'));
@@ -111,6 +111,10 @@
 				TabRoll.controller.extendDuration(highlighted);
 			}
 		});
+	};
+
+	TabRoll.controller.measureIdFromMeasureView = function(measureView) {
+		return parseInt(measureView.attr('id').split('-')[1]);
 	};
 
 	TabRoll.controller.updateMeasureIds = function () {
@@ -173,7 +177,7 @@
 	TabRoll.controller.measureFromTickSpan = function (tickSpan) {
 			var stringView = tickSpan.parent();
 			var measureView = stringView.parent(); 
-			var measureId = measureView.attr('id').split('-')[1];
+			var measureId = TabRoll.controller.measureIdFromMeasureView(measureView);
 			return TabRoll.model.measures[measureId];
 	};
 
